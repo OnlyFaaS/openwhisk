@@ -42,7 +42,7 @@ import okio.BufferedSource
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.openwhisk.common.LoggingMarkers
 import org.apache.openwhisk.common.{ConfigMapValue, Logging, TransactionId}
-import org.apache.openwhisk.core.{ConfigKeys, entity}
+import org.apache.openwhisk.core.{ConfigKeys}
 import org.apache.openwhisk.core.containerpool.docker.ProcessRunner
 import org.apache.openwhisk.core.containerpool.{ContainerAddress, ContainerId}
 import org.apache.openwhisk.core.entity.ByteSize
