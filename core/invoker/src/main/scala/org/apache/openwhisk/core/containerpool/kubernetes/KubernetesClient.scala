@@ -135,7 +135,7 @@ class KubernetesClient(
 
   def run(name: String,
           image: String,
-          memory: ByteSize = entity.ByteSize(256, SizeUnits.MB),
+          memory: ByteSize = 256.MB,
           environment: Map[String, String],
           labels: Map[String, String])(implicit transid: TransactionId): Future[KubernetesContainer] = {
     this.run(name, None, image, memory, environment, labels)
@@ -144,7 +144,7 @@ class KubernetesClient(
   def run(name: String,
           namespace: Option[String],
           image: String,
-          memory: ByteSize = entity.ByteSize(256, SizeUnits.MB),
+          memory: ByteSize = 256.MB,
           environment: Map[String, String] = Map.empty,
           labels: Map[String, String] = Map.empty)(implicit transid: TransactionId): Future[KubernetesContainer] = {
 
