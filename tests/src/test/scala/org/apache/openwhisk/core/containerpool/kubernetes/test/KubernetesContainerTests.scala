@@ -102,7 +102,9 @@ class KubernetesContainerTests
       Future.successful(RunResult(intervalOf(1.millisecond), Right(ContainerResponse(true, "", None)))),
     awaitLogs: FiniteDuration = 2.seconds)(implicit kubernetes: KubernetesApi): KubernetesContainer = {
 
-    new KubernetesContainer(id, addr, addr.host, "docker://" + id.asString) {
+    val namespace = "default"
+
+    new KubernetesContainer(id, namespace, addr, addr.host, "docker://" + id.asString) {
       override protected def callContainer(
         path: String,
         body: JsObject,
@@ -135,8 +137,10 @@ class KubernetesContainerTests
     val environment = Map("test" -> "hi")
     val labels = Map("invoker" -> "0")
     val name = "my_Container(1)"
+    val namespace = "default"
     val container = KubernetesContainer.create(
       transid = transid,
+      namespace = namespace,
       image = image,
       userProvidedImage = userProvidedImage,
       environment = environment,
@@ -159,7 +163,7 @@ class KubernetesContainerTests
     implicit val kubernetes = new TestKubernetesClient
 
     val container =
-      KubernetesContainer.create(transid = transid, name = "name", image = "image", userProvidedImage = true)
+      KubernetesContainer.create(transid = transid, name = "name", namespace = "default", image = "image", userProvidedImage = true)
     await(container)
 
     kubernetes.runs should have size 1
@@ -179,7 +183,7 @@ class KubernetesContainerTests
     }
 
     val container =
-      KubernetesContainer.create(transid = transid, name = "name", image = "image", userProvidedImage = true)
+      KubernetesContainer.create(transid = transid, namespace = "default", name = "name", image = "image", userProvidedImage = true)
     a[WhiskContainerStartupError] should be thrownBy await(container)
 
     kubernetes.runs should have size 0
@@ -193,7 +197,7 @@ class KubernetesContainerTests
     implicit val kubernetes = stub[KubernetesApi]
 
     val id = ContainerId("id")
-    val container = new KubernetesContainer(id, ContainerAddress("ip"), "127.0.0.1", "docker://foo")
+    val container = new KubernetesContainer(id, "default", ContainerAddress("ip"), "127.0.0.1", "docker://foo")
 
     container.destroy()
 
@@ -495,7 +499,7 @@ class KubernetesContainerTests
     }
 
     val container =
-      KubernetesContainer.create(transid = transid, name = "name", image = "image", userProvidedImage = true)
+      KubernetesContainer.create(transid = transid, namespace = "default", name = "name", image = "image", userProvidedImage = true)
     container.failed.futureValue shouldBe WhiskContainerStartupError(Messages.resourceProvisionError)
 
     kubernetes.runs should have size 0
@@ -515,7 +519,7 @@ class KubernetesContainerTests
     }
 
     val container =
-      KubernetesContainer.create(transid = transid, name = "name", image = "image", userProvidedImage = true)
+      KubernetesContainer.create(transid = transid, namespace = "default", name = "name", image = "image", userProvidedImage = true)
     container.failed.futureValue shouldBe a[WhiskContainerStartupError]
 
     kubernetes.runs should have size 0

@@ -135,6 +135,7 @@ class KubernetesClient(
   private val podBuilder = new WhiskPodBuilder(kubeRestClient, config)
 
   def run(name: String,
+          namespace: String,
           image: String,
           memory: ByteSize = 256.MB,
           environment: Map[String, String] = Map.empty,
@@ -306,7 +307,7 @@ class KubernetesClient(
     // By convention, kubernetes adds a docker:// prefix when using docker as the low-level container engine
     val nativeContainerId = pod.getStatus.getContainerStatuses.get(0).getContainerID.stripPrefix("docker://")
     implicit val kubernetes = this
-    new KubernetesContainer(id, addr, workerIP, nativeContainerId, portFwd)
+    new KubernetesContainer(id, pod.getMetadata.getNamespace, addr, workerIP, nativeContainerId, portFwd)
   }
 
   // check for ready status every 1 second until timeout (minus the start time, which is the time for the pod create call) has past
@@ -377,8 +378,16 @@ trait KubernetesApi {
           environment: Map[String, String] = Map.empty,
           labels: Map[String, String] = Map.empty)(implicit transid: TransactionId): Future[KubernetesContainer]
 
+  def run(name: String,
+          namespace: String,
+          image: String,
+          memory: ByteSize,
+          environment: Map[String, String] = Map.empty,
+          labels: Map[String, String] = Map.empty)(implicit transid: TransactionId): Future[KubernetesContainer]
+
   def rm(container: KubernetesContainer)(implicit transid: TransactionId): Future[Unit]
   def rm(podName: String)(implicit transid: TransactionId): Future[Unit]
+  def rm(podName: String, namespace: String)(implicit transid: TransactionId): Future[Unit]
   def rm(labels: Map[String, String], ensureUnpaused: Boolean)(implicit transid: TransactionId): Future[Unit]
 
   def suspend(container: KubernetesContainer)(implicit transid: TransactionId): Future[Unit]

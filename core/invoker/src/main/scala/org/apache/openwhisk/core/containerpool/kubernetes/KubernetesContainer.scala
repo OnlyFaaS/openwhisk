@@ -56,6 +56,7 @@ object KubernetesContainer {
    */
   def create(transid: TransactionId,
              name: String,
+             namespace: String,
              image: String,
              userProvidedImage: Boolean = false,
              memory: ByteSize = 256.MB,
@@ -65,12 +66,18 @@ object KubernetesContainer {
                                                       log: Logging): Future[KubernetesContainer] = {
     implicit val tid = transid
 
+    if(namespace.isEmpty) {
+      log.error(this, "Namespace was empty")
+    } else {
+      log.info(this, s"Namespace is ${namespace}")
+    }
+
     // Kubernetes naming rule allows maximum length of 63 character and ended with character only.
     val origName = name.replace("_", "-").replaceAll("[()]", "").toLowerCase.take(63)
     val podName = if (origName.endsWith("-")) origName.reverse.dropWhile(_ == '-').reverse else origName
-
+    val podNamespace = namespace
     for {
-      container <- kubernetes.run(podName, image, memory, environment, labels).recoverWith {
+      container <- kubernetes.run(podName, podNamespace, image, memory, environment, labels).recoverWith {
         case e: KubernetesPodApiException =>
           //apiserver call failed - this will expose a different error to users
           cleanupFailedPod(e, podName, WhiskContainerStartupError(Messages.resourceProvisionError))
@@ -110,6 +117,7 @@ object KubernetesContainer {
  * @param nativeContainerId the docker/containerd lowlevel id for the container
  */
 class KubernetesContainer(protected[core] val id: ContainerId,
+                          protected[core] val namespace: String,
                           protected[core] val addr: ContainerAddress,
                           protected[core] val workerIP: String,
                           protected[core] val nativeContainerId: String,
