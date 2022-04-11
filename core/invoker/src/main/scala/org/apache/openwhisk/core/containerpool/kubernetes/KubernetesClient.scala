@@ -135,7 +135,7 @@ class KubernetesClient(
 
   def run(name: String,
           image: String,
-          memory: ByteSize = 256.MB,
+          memory: ByteSize,
           environment: Map[String, String],
           labels: Map[String, String])(implicit transid: TransactionId): Future[KubernetesContainer] = {
     this.run(name, None, image, memory, environment, labels)
@@ -149,7 +149,6 @@ class KubernetesClient(
           labels: Map[String, String] = Map.empty)(implicit transid: TransactionId): Future[KubernetesContainer] = {
 
     val podNamespace = namespace.getOrElse(kubeRestClient.getNamespace)
-
 
     val (pod, pdb) = podBuilder.buildPodSpec(name, image, memory, environment, labels, config)
     if (transid.meta.extraLogging) {
@@ -392,8 +391,8 @@ trait KubernetesApi {
   def run(name: String,
           image: String,
           memory: ByteSize,
-          environment: Map[String, String] = Map.empty,
-          labels: Map[String, String] = Map.empty)(implicit transid: TransactionId): Future[KubernetesContainer]
+          environment: Map[String, String],
+          labels: Map[String, String])(implicit transid: TransactionId): Future[KubernetesContainer]
 
   def run(name: String,
           namespace: Option[String],
