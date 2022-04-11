@@ -21,7 +21,9 @@ jobs:
       - name: Set the image tag
         id: image_vars
         run: |
+          REPO=${{ github.repository }}
           TAG=latest
+          echo ::set-output name=repo::$(echo $REPO | awk '{print tolower($0)}')
           echo ::set-output name=tag::$(echo $TAG | awk '{print tolower($0)}')
 
       - uses: actions/setup-java@v2
@@ -33,4 +35,4 @@ jobs:
         uses: gradle/gradle-build-action@v2
 
       - name: Execute Gradle build
-        run: ./gradlew distDocker -PdockerRegistry=ghcr.io -PdockerImagePrefix=${{ github.repository }} -PdockerImageTag=${{steps.image_vars.outputs.tag}}
+        run: ./gradlew distDocker -PdockerRegistry=ghcr.io -PdockerImagePrefix=${{steps.image_vars.outputs.repo}} -PdockerImageTag=${{steps.image_vars.outputs.tag}}
