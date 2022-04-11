@@ -20,7 +20,6 @@ package org.apache.openwhisk.core.containerpool.kubernetes
 import akka.actor.ActorSystem
 import pureconfig._
 import pureconfig.generic.auto._
-import java.lang
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
@@ -32,7 +31,6 @@ import org.apache.openwhisk.core.entity.{ByteSize, ExecutableWhiskAction, Invoke
 import org.apache.openwhisk.core.entity.ExecManifest.ImageName
 import org.apache.openwhisk.core.entity.size._
 import org.apache.openwhisk.core.{ConfigKeys, WhiskConfig}
-import spray.json.{JsObject, JsValue}
 
 class KubernetesContainerFactory(
   label: String,
