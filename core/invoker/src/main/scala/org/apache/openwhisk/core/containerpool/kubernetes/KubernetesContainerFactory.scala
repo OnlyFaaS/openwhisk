@@ -42,7 +42,7 @@ class KubernetesContainerFactory(
     ConfigKeys.userImagesRegistry))(implicit actorSystem: ActorSystem, ec: ExecutionContext, logging: Logging)
     extends ContainerFactory {
 
-  implicit val kubernetes = initializeKubeClient()
+  implicit val kubernetes: KubernetesClient = initializeKubeClient()
 
   private def initializeKubeClient(): KubernetesClient = {
     val config = loadConfigOrThrow[KubernetesClientConfig](ConfigKeys.kubernetes)
@@ -52,10 +52,10 @@ class KubernetesContainerFactory(
   /** Perform cleanup on init */
   override def init(): Unit = cleanup()
 
-  override def cleanup() = {
+  override def cleanup(): Unit = {
     logging.info(this, "Cleaning up function runtimes")
     val labels = Map("invoker" -> label, "release" -> KubernetesContainerFactoryProvider.release)
-    val cleaning = kubernetes.rm(labels, true)(TransactionId.invokerNanny)
+    val cleaning = kubernetes.rm(labels, ensureUnpaused = true)(TransactionId.invokerNanny)
     Await.ready(cleaning, KubernetesContainerFactoryProvider.runtimeDeleteTimeout)
   }
 
@@ -99,8 +99,8 @@ class KubernetesContainerFactory(
 
 object KubernetesContainerFactoryProvider extends ContainerFactoryProvider {
 
-  val release = loadConfigOrThrow[String]("whisk.helm.release")
-  val runtimeDeleteTimeout = loadConfigOrThrow[FiniteDuration]("whisk.runtime.delete.timeout")
+  val release: String = loadConfigOrThrow[String]("whisk.helm.release")
+  val runtimeDeleteTimeout: FiniteDuration = loadConfigOrThrow[FiniteDuration]("whisk.runtime.delete.timeout")
 
   override def instance(actorSystem: ActorSystem,
                         logging: Logging,
