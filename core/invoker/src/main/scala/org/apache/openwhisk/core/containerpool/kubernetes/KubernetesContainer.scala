@@ -77,23 +77,23 @@ object KubernetesContainer {
     val podName = if (origName.endsWith("-")) origName.reverse.dropWhile(_ == '-').reverse else origName
     val podNamespace = namespace
     for {
-      container <- kubernetes.run(podName, podNamespace, image, memory, environment, labels).recoverWith {
+      container <- kubernetes.run(podName, Some(podNamespace), image, memory, environment, labels).recoverWith {
         case e: KubernetesPodApiException =>
           //apiserver call failed - this will expose a different error to users
-          cleanupFailedPod(e, podName, WhiskContainerStartupError(Messages.resourceProvisionError))
+          cleanupFailedPod(e, podName, Some(podNamespace), WhiskContainerStartupError(Messages.resourceProvisionError))
         case e: Throwable =>
-          cleanupFailedPod(e, podName, WhiskContainerStartupError(s"Failed to run container with image '$image'."))
+          cleanupFailedPod(e, podName, Some(podNamespace), WhiskContainerStartupError(s"Failed to run container with image '$image'."))
       }
     } yield container
   }
-  private def cleanupFailedPod(e: Throwable, podName: String, failureCause: Exception)(
+  private def cleanupFailedPod(e: Throwable, podName: String, podNamespace: Option[String], failureCause: Exception)(
     implicit kubernetes: KubernetesApi,
     ec: ExecutionContext,
     tid: TransactionId,
     log: Logging) = {
     log.info(this, s"Deleting failed pod '$podName' after: ${e.getClass} - ${e.getMessage}")
     kubernetes
-      .rm(podName)
+      .rm(podName, Some(podNamespace).flatten)
       .andThen {
         case Failure(e) =>
           log.error(this, s"Failed delete pod for '$podName': ${e.getClass} - ${e.getMessage}")
