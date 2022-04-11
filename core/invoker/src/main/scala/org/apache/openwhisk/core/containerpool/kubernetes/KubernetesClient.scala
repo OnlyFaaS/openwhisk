@@ -45,7 +45,7 @@ import org.apache.openwhisk.common.{ConfigMapValue, Logging, TransactionId}
 import org.apache.openwhisk.core.{ConfigKeys, entity}
 import org.apache.openwhisk.core.containerpool.docker.ProcessRunner
 import org.apache.openwhisk.core.containerpool.{ContainerAddress, ContainerId}
-import org.apache.openwhisk.core.entity.{ByteSize, SizeUnits}
+import org.apache.openwhisk.core.entity.ByteSize
 import org.apache.openwhisk.core.entity.size._
 import pureconfig._
 import pureconfig.generic.auto._
