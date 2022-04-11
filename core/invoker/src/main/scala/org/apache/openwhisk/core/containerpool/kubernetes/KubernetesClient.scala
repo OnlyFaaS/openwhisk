@@ -133,14 +133,18 @@ class KubernetesClient(
 
   private val podBuilder = new WhiskPodBuilder(kubeRestClient, config)
 
-  override def run(name: String, image: String, memory: ByteSize, environment: Map[String, String], labels: Map[String, String])(implicit transid: TransactionId): Future[KubernetesContainer] = {
+  def run(name: String,
+          image: String,
+          memory: ByteSize,
+          environment: Map[String, String],
+          labels: Map[String, String])(implicit transid: TransactionId): Future[KubernetesContainer] = {
     this.run(name, None, image, memory, environment, labels)
   }
 
   def run(name: String,
           namespace: Option[String],
           image: String,
-          memory: ByteSize = new entity.ByteSize(256, SizeUnits.MB),
+          memory: ByteSize = entity.ByteSize(256, SizeUnits.MB),
           environment: Map[String, String] = Map.empty,
           labels: Map[String, String] = Map.empty)(implicit transid: TransactionId): Future[KubernetesContainer] = {
 
