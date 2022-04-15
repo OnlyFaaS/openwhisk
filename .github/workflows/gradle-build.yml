@@ -22,7 +22,17 @@ jobs:
         id: image_vars
         run: |
           REPO=${{ github.repository }}
-          TAG=latest
+          TAG=dev
+          
+          # Strip git ref prefix from ref.
+          GITREF=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          
+          # Strip "v" prefix from tag name.
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && TAG=$(echo $GITREF | sed -e 's/^v//')
+          
+          # Use Docker `latest` tag convention.
+          [ "$GITREF" == "main" ] && TAG=latest
+          
           echo ::set-output name=repo::$(echo $REPO | awk '{print tolower($0)}')
           echo ::set-output name=tag::$(echo $TAG | awk '{print tolower($0)}')
 
