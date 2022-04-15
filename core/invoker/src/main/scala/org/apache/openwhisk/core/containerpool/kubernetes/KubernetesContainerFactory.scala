@@ -80,7 +80,9 @@ class KubernetesContainerFactory(
     val image = actionImage.resolveImageName(Some(
       ContainerFactory.resolveRegistryConfig(userProvidedImage, runtimesRegistryConfig, userImagesRegistryConfig).url))
 
-    var actionNamespace = action.get.annotations.get("x-namespace").get.toString()
+
+    //var actionNamespace = action.get.annotations.get("x-namespace").get.toString()
+    var actionNamespace = action.get.namespace.namespace
     if(actionNamespace.isEmpty){
       actionNamespace = config.getProperty("defaultActionNamespace")
     }
